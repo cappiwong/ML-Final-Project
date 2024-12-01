@@ -1,4 +1,4 @@
-# change in game.py
+# add this comment
 import pygame
 import random
 from enum import Enum
