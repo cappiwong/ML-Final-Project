@@ -1,4 +1,4 @@
-# P anjeng
+# new
 import torch
 import random
 import numpy as np
@@ -10,6 +10,8 @@ from helper import plot
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
+# LR = 0.001 -> n_games = 25 avg score = 0.03
+# LR = 0.01 -> n_games = 25 avg score = 0.03
 
 class Agent:
 
