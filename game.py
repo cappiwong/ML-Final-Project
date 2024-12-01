@@ -1,4 +1,4 @@
-# tesssssssssssssssssssssssssssssssssssssssssssss
+# copas ini di github
 import pygame
 import random
 from enum import Enum
