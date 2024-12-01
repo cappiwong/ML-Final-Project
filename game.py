@@ -1,4 +1,4 @@
-# woi jancok
+# add comment
 import pygame
 import random
 from enum import Enum
