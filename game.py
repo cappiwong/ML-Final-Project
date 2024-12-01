@@ -1,4 +1,4 @@
-# add comment
+# add kontol
 import pygame
 import random
 from enum import Enum
