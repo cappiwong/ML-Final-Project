@@ -148,9 +148,49 @@ class SnakeGameAI:
             pygame.draw.rect(self.display, color, pygame.Rect(portal.x, portal.y, BLOCK_SIZE, BLOCK_SIZE))
 
         # Display score
-        text = font.render("Score: " + str(self.score), True, WHITE)
-        self.display.blit(text, [0, 0])
+        score_text = font.render("Score: " + str(self.score), True, WHITE)
+        self.display.blit(score_text, [0, 0])
+
+        # Create a smaller font for descriptions
+        small_font = pygame.font.Font('arial.ttf', 18)
+
+        # Create description lines
+        red_text = small_font.render("Red", True, RED)
+        food_text = small_font.render("means food", True, WHITE)
+        pink_text = small_font.render("Pink", True, (255, 105, 180))  # Pink color
+        and_text = small_font.render("and", True, WHITE)
+        green_text = small_font.render("Green", True, (0, 255, 0))  # Green color
+        portals_text = small_font.render("represent portals", True, WHITE)
+
+        # Get window dimensions
+        window_width, window_height = self.display.get_size()
+
+        # Calculate positions
+        right_margin = 10  # Space from the right edge
+        line_spacing = 5  # Spacing between lines
+
+        # Line 1: "Red means food"
+        red_text_pos = (window_width - red_text.get_width() - food_text.get_width() - right_margin, window_height - 50)
+        food_text_pos = (red_text_pos[0] + red_text.get_width() + 5, window_height - 50)
+
+        # Line 2: "Pink and Green represent portals"
+        pink_text_pos = (window_width - pink_text.get_width() - and_text.get_width() - green_text.get_width() - portals_text.get_width() - right_margin, window_height - 25)
+        and_text_pos = (pink_text_pos[0] + pink_text.get_width() + 5, window_height - 25)
+        green_text_pos = (and_text_pos[0] + and_text.get_width() + 5, window_height - 25)
+        portals_text_pos = (green_text_pos[0] + green_text.get_width() + 5, window_height - 25)
+
+        # Draw text for line 1
+        self.display.blit(red_text, red_text_pos)
+        self.display.blit(food_text, food_text_pos)
+
+        # Draw text for line 2
+        self.display.blit(pink_text, pink_text_pos)
+        self.display.blit(and_text, and_text_pos)
+        self.display.blit(green_text, green_text_pos)
+        self.display.blit(portals_text, portals_text_pos)
+
         pygame.display.flip()
+
 
     def _move(self, action):
         # [straight, right, left]
