@@ -1,3 +1,4 @@
+# copas ini di github
 import pygame
 import random
 from enum import Enum
@@ -71,56 +72,22 @@ class SnakeGameAI:
                 portal = Point(x, y)
             self.portals.append(portal)
 
-    # def play_step(self, action):
-    #     self.frame_iteration += 1
-    #     # 1. collect user input
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             pygame.quit()
-    #             quit()
-
-    #     # 2. move
-    #     self._move(action)  # update the head
-    #     self.snake.insert(0, self.head)
-
-    #     # 3. check for portals
-    #     self._check_portals()
-
-    #     # 4. check if game over
-    #     reward = 0
-    #     game_over = False
-    #     if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
-    #         game_over = True
-    #         reward = -10
-    #         return reward, game_over, self.score
-
-    #     # 5. place new food or just move
-    #     if self.head == self.food:
-    #         self.score += 1
-    #         reward = 10
-    #         self._place_food()
-    #     else:
-    #         self.snake.pop()
-
-    #     # 6. update ui and clock
-    #     self._update_ui()
-    #     self.clock.tick(SPEED)
-    #     # 7. return game over and score
-    #     return reward, game_over, self.score
     def play_step(self, action):
         self.frame_iteration += 1
-
-        # 1. Collect user input
+        # 1. collect user input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
-        # 2. Move
-        self._move(action)
+        # 2. move
+        self._move(action)  # update the head
         self.snake.insert(0, self.head)
 
-        # 3. Check if game over
+        # 3. check for portals
+        self._check_portals()
+
+        # 4. check if game over
         reward = 0
         game_over = False
         if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
@@ -128,28 +95,19 @@ class SnakeGameAI:
             reward = -10
             return reward, game_over, self.score
 
-        # 4. Place new food or just move
-        distance_to_food_before = abs(self.food.x - self.snake[1].x) + abs(self.food.y - self.snake[1].y)
-        distance_to_food_after = abs(self.food.x - self.head.x) + abs(self.food.y - self.head.y)
-
+        # 5. place new food or just move
         if self.head == self.food:
             self.score += 1
             reward = 10
             self._place_food()
         else:
             self.snake.pop()
-            if distance_to_food_after < distance_to_food_before:
-                reward = 1  # Reward for moving closer to the food
-            else:
-                reward = -1  # Penalty for moving away from food
 
-        # 5. Update UI and clock
+        # 6. update ui and clock
         self._update_ui()
         self.clock.tick(SPEED)
-
-        # 6. Return game over and score
+        # 7. return game over and score
         return reward, game_over, self.score
-
 
     def _check_portals(self):
         for i in range(0, len(self.portals), 2):
