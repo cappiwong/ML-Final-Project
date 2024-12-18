@@ -6,6 +6,7 @@ import numpy as np
 
 pygame.init()
 font = pygame.font.Font('arial.ttf', 25)
+#font = pygame.font.SysFont('arial', 25)
 
 class Direction(Enum):
     RIGHT = 1
@@ -17,15 +18,16 @@ Point = namedtuple('Point', 'x, y')
 
 # rgb colors
 WHITE = (255, 255, 255)
-RED = (200, 0, 0)
+RED = (200,0,0)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
-BLACK = (0, 0, 0)
+BLACK = (0,0,0)
 
 BLOCK_SIZE = 20
 SPEED = 100
 
 class SnakeGameAI:
+
     def __init__(self, w=640, h=480):
         self.w = w
         self.h = h
@@ -35,69 +37,89 @@ class SnakeGameAI:
         self.clock = pygame.time.Clock()
         self.reset()
 
+
     def reset(self):
         # init game state
         self.direction = Direction.RIGHT
-        self.head = Point(self.w / 2, self.h / 2)
-        self.snake = [
-            self.head,
-            Point(self.head.x - BLOCK_SIZE, self.head.y),
-            Point(self.head.x - (2 * BLOCK_SIZE), self.head.y),
-        ]
+        
+        self.head = Point(self.w/2, self.h/2)
+        self.snake = [self.head,
+                      Point(self.head.x-BLOCK_SIZE, self.head.y),
+                      Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
+
         self.score = 0
         self.food = None
         self._place_food()
         self.frame_iteration = 0
+        # self.step_count = 0
 
     def _place_food(self):
-        x = random.randint(0, (self.w - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
-        y = random.randint(0, (self.h - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
+        x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        y = random.randint(0, (self.h-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
         self.food = Point(x, y)
         if self.food in self.snake:
             self._place_food()
 
     def play_step(self, action):
         self.frame_iteration += 1
-
-        # 1. Collect user input
+        # self.step_count += 1
+        # 1. collect user input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
-        # 2. Move
-        self._move(action)
+        
+        # 2. move
+        self._move(action) # update the head
         self.snake.insert(0, self.head)
-
-        # 3. Check if game over
+        
+        # 3. check if game over
         reward = 0
         game_over = False
-        if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
+
+        food_distance_before = self._calculate_distance(self.head, self.food)
+        # tail_distance_before = self._calculate_distance(self.head, self.snake[-1])
+        if self.is_collision() or self.frame_iteration > 200 * len(self.snake):
             game_over = True
             reward = -10
             return reward, game_over, self.score
 
-        # 4. Place new food or just move
-        distance_to_food_before = abs(self.food.x - self.snake[1].x) + abs(self.food.y - self.snake[1].y)
-        distance_to_food_after = abs(self.food.x - self.head.x) + abs(self.food.y - self.head.y)
-
+        # 4. place new food or just move
         if self.head == self.food:
             self.score += 1
             reward = 10
             self._place_food()
+            # self.step_count = 0
         else:
             self.snake.pop()
-            if distance_to_food_after < distance_to_food_before:
-                reward = 1  # Reward for moving closer to the food
-            else:
-                reward = -1  # Penalty for moving away from food
 
-        # 5. Update UI and clock
+            food_distance_after = self._calculate_distance(self.head, self.food)
+            # tail_distance_after = self._calculate_distance(self.head, self.food)
+
+            # if tail_distance_after < tail_distance_before:
+            #     reward = -0.5
+            # else:
+            #     reward = 0.5
+                
+            if len(self.snake) <= 30:
+                if food_distance_after < food_distance_before:
+                    reward = 0.1 # Small reward for moving closer to food
+                else:
+                    reward = -0.1  # Small penalty for moving farther from food
+            # else:
+            #     if food_distance_after < food_distance_before:
+            #         reward = -0.5  # Small reward for moving closer to food
+            #     else:
+            #         reward = 0.1  # Small penalty for moving farther from food
+
+        # 5. update ui and clock
         self._update_ui()
         self.clock.tick(SPEED)
-
-        # 6. Return game over and score
+        # 6. return game over and score
         return reward, game_over, self.score
+    
+    def _calculate_distance(self, point1, point2):
+        return abs(point1.x - point2.x) + abs(point1.y - point2.y)
 
     def is_collision(self, pt=None):
         if pt is None:
@@ -111,36 +133,35 @@ class SnakeGameAI:
 
         return False
 
+
     def _update_ui(self):
         self.display.fill(BLACK)
 
-        # Draw the snake
         for pt in self.snake:
             pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12))
+            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
 
-        # Draw the food
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 
-        # Display score
-        score_text = font.render("Score: " + str(self.score), True, WHITE)
-        self.display.blit(score_text, [0, 0])
-
+        text = font.render("Score: " + str(self.score), True, WHITE)
+        self.display.blit(text, [0, 0])
         pygame.display.flip()
+
 
     def _move(self, action):
         # [straight, right, left]
+
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
 
         if np.array_equal(action, [1, 0, 0]):
-            new_dir = clock_wise[idx]  # no change
+            new_dir = clock_wise[idx] # no change
         elif np.array_equal(action, [0, 1, 0]):
             next_idx = (idx + 1) % 4
-            new_dir = clock_wise[next_idx]  # right turn
-        else:  # [0, 0, 1]
+            new_dir = clock_wise[next_idx] # right turn r -> d -> l -> u
+        else: # [0, 0, 1]
             next_idx = (idx - 1) % 4
-            new_dir = clock_wise[next_idx]  # left turn
+            new_dir = clock_wise[next_idx] # left turn r -> u -> l -> d
 
         self.direction = new_dir
 
