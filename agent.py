@@ -4,7 +4,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import Linear_QNet, QTrainer
+from model import Linear_QNet, QTrainer, Dueling_Noisy_QNet
 from helper import plot
 import math
 from collections import deque
